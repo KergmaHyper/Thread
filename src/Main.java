@@ -7,7 +7,11 @@ public class Main {
 
 
         for (int i = 1; i<41;i++){
-            new JThread("Jtread-"+i,i).start();
+            JThread t = new JThread("Jtread-"+i,i);
+            t.start();
+            try{
+                t.join(200);
+            }catch (InterruptedException ie1){System.out.println(ie1.getMessage());}
         }
 
         System.out.println("!!!!!!!!!!!!!! ended work Thread !!!!!!!!!!!!- "+Thread.currentThread().getName());
