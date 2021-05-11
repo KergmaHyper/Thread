@@ -7,8 +7,11 @@ public class Main {
         System.out.println(t.getName());
       t.setName("ThreadApplication");
         System.out.println(t.getName());
-        System.out.println("wait 3000 miliseconds");
-      //t.wait(3000) ;
+        try{
+            System.out.println("sleep 3000 miliseconds");
+            t.sleep(3000);
+            System.out.println("end sleep 3000 miliseconds");
+        } catch (InterruptedException ie){System.out.println(ie.getMessage());}
 
         System.out.println(t);
 
