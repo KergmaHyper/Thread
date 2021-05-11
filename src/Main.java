@@ -4,36 +4,25 @@ import java.lang.*;
 public class Main {
 
     public static void main(String[] args) {
-      Thread t = Thread.currentThread();
-        System.out.println(t.getName());
-      t.setName("MAIN_ThreadApplication");
-        System.out.println(t.getName());
 
 
-         JThread jt = new JThread("JounTreadMain");
-         jt.start();
+        for (int i = 1; i<41;i++){
+            new JThread("Jtread-"+i,i).start();
+        }
 
-        try{
-            System.out.println(">>>>>>>>>>>>>> sleep 3000 miliseconds");
-            t.sleep(3000);
-            System.out.println("<<<<<<<<<<<<<< end sleep 3000 miliseconds");
-        } catch (InterruptedException ie){System.out.println(ie.getMessage());}
-
-        System.out.println(t);
-        System.out.println("ended work Thread - "+Thread.currentThread().getName());
+        System.out.println("!!!!!!!!!!!!!! ended work Thread !!!!!!!!!!!!- "+Thread.currentThread().getName());
     }
 }
 
 class JThread extends Thread {
-    JThread(String Name){   super(Name);  }
+    int sec;
+    JThread(String Name, int Sec){   super(Name); this.sec=Sec*200+1000; }
 
     public void run(){
-        System.out.println(" Started thread - "+Thread.currentThread().getName());
         try {
-            System.out.println(">>>>>>>>>>>>>>>> begin sleep 4000 ms");
-            Thread.sleep(4000);
-            System.out.println("<<<<<<<<<<<<<<<<< end sleep 4000 ms");
+            System.out.printf(">>>>>>>>>>>>>>>> begin sleep %d ms thread %s\r\n",sec,Thread.currentThread().getName());
+            Thread.sleep(sec);
+            System.out.printf("<<<<<<<<<<<<<<<<< end sleep %d ms thread %s\r\n",sec,Thread.currentThread().getName());
         }catch (InterruptedException ie){System.out.println(ie.getMessage());};
-        System.out.println("ended work Thread - "+Thread.currentThread().getName());
-    }
+         }
 }
