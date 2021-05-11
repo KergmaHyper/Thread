@@ -8,24 +8,33 @@ public class Main {
     public static void main(String[] args) {
 
         Runnable rt1 = ()->{
-            System.out.println(">>>>>>>>>>>>>>>>> Start ODD RT1 +++"+Thread.currentThread().getName());
-            try{ Thread.sleep(1000); }catch (InterruptedException ie){System.out.println("Thread interrupted");}
+            int i=0;
+            System.out.println(">>>>>>>>>>>>>>>>> Start +++"+Thread.currentThread().getName());
+            while( (!Thread.currentThread().isInterrupted()&i<10)) {
+                try {
+                    i++;
+                    Thread.sleep(500);
+                    System.out.printf("LOOP is thread %s isInterrupted %b\r\n",
+                            Thread.currentThread().getName(),Thread.currentThread().isInterrupted());
+                } catch (InterruptedException ie) {
+                    System.out.printf("Thread %s interrupted\r\n",Thread.currentThread().getName());
+                    break;
+                }
+            }
             System.out.println("<<<<<<<<<<<<<<<<< Stop RT1 ---"+Thread.currentThread().getName());
         };
-        Runnable rt2 = ()->{
-            System.out.println("``````````````````` Start NOT ODD RT2 +++"+Thread.currentThread().getName());
-            try{ Thread.sleep(1500); }catch (InterruptedException ie){System.out.println("Thread interrupted");}
-            System.out.println("''''''''''''''''''' Stop RT2 ---"+Thread.currentThread().getName());
-        };
-        Predicate<Integer> odd = (x)->(x%2)==0;
+         Thread myThr = new Thread(rt1,"MyThread");
+         myThr.start();
+         try {
+             Thread.sleep(2000);
+             myThr.interrupt();
+         }catch (InterruptedException ie){System.out.println("Interrupt sleep");}
 
-        for (int i = 1; i<41;i++){
-            Thread t = new Thread(  (odd.test(i)?rt1:rt2),"Jtread:"+i);
-            t.start();
-            try{
-                t.join(200);
-            }catch (InterruptedException ie1){System.out.println(ie1.getMessage());}
-        }
+         System.out.println("STOP Main ");
+
+
+
+
 
        // System.out.println("!!!!!!!!!!!!!! ended work Thread !!!!!!!!!!!!- "+Thread.currentThread().getName());
     }
