@@ -1,82 +1,53 @@
 import java.lang.*;
+import java.util.concurrent.Semaphore;
 
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("START Main ");
+        Semaphore sem1 = new Semaphore(3,true);
+        CommonResource comres1 = new CommonResource();
 
-        Store store = new Store();
-        Producer producer = new Producer(store);
-        Consumer consumer = new Consumer(store);
-        new Thread(producer).start();
-        new Thread(consumer).start();
+        new Thread( new Count(comres1,sem1,"Thread1",1)).start();
+        new Thread( new Count(comres1,sem1,"Thread2",10)).start();
+        new Thread( new Count(comres1,sem1,"Thread3",100)).start();
+        new Thread( new Count(comres1,sem1,"Thread4",1000)).start();
+
 
         System.out.println("STOP Main ");
 
     }
 }
 
-
-
-
-class Store {
-    private int product=0;
-    public synchronized void get() {
-        while (product < 1) {
-            try {
-                wait();
-                System.out.println("STORY EMPTY");
-            } catch (InterruptedException e) {
-            }
-        }
-            product--;
-            System.out.printf("Consummer get 1 pc product from STORY\r\n");
-            System.out.printf("Avalable %d pc product \r\n", product);
-            notify();
-        }
-
-
-
-        public synchronized void put() {
-        while (product >= 3) {
-            try {
-                wait();
-                System.out.println("STORY FULL");
-            }
-            catch (InterruptedException e) {}
-        }
-
-            product++;
-            System.out.printf("Produser put 1 pc product into STORE\r\n");
-            System.out.printf("Avalable %d ps product\r\n",product);
-            notify();
-
-    }
+class CommonResource{
+    int x=0;
 }
 
-  class Producer implements Runnable{
-        Store store;
-        Producer(Store store){
-            this.store=store;
-        }
-         public void run() {
-            for (int i = 1; i < 20; i++) {
-                store.put();
+class Count implements Runnable{
+    CommonResource res;
+    Semaphore sem;
+    String name;
+    int count;
+    Count(CommonResource res,Semaphore sem, String name, int count){
+        this.res=res;
+        this.sem=sem;
+        this.name=name;
+        this.count=count;
+    }
+    public void run(){
+        try{
+            System.out.println("Request access CommonResurce from "+this.name);
+            sem.acquire();
+            for (int i=1;i<10;i++){
+               res.x+=count;
+               System.out.println(this.name+":"+res.x);
             }
-         }
+
+        }catch (InterruptedException e){}
+        System.out.println("Release access CommonResource from "+this.name);
+        sem.release();
     }
 
-  class Consumer implements Runnable{
-        Store store;
-        Consumer(Store store){
-            this.store=store;
-        }
-        public void run(){
-            for (int i = 1;i<20;i++){
-                store.get();
-            }
-        }
-  }
 
 
-
+}
