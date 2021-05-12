@@ -1,53 +1,38 @@
 import java.lang.*;
+import java.util.concurrent.Exchanger;
 import java.util.concurrent.Semaphore;
 
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("START Main ");
-        Semaphore table = new Semaphore(2);
-
-        for ( int i = 1; i < 6; i++ ) {
-
-         new Thread( new Philo(i,table) ).start();
-
-        }
-
-
-
-
+        Exchanger<String> ex1 = new Exchanger<String>();
+        new Thread(new Change(ex1,"Thread1","Message1 from Thread1")).start();
+        new Thread(new Change(ex1,"Thread2","Message2 from Thread2")).start();
+        new Thread(new Change(ex1,"Thread3","Message3 from Thread3")).start();
+        new Thread(new Change(ex1,"Thread4","Message4 from Thread4")).start();
+        new Thread(new Change(ex1,"Thread5","Message5 from Thread5")).start();
         System.out.println("STOP Main ");
-
     }
 }
+class Change implements Runnable{
+    Exchanger<String> exchanger;
+    String message;
+    String name;
 
+    Change(Exchanger exchanger,String name,String message){
+        this.message=message;
+        this.exchanger=exchanger;
+        this.name = name;    }
 
-class Philo implements Runnable {
-    int ID;
-
-    int Count = 1;
-
-    Semaphore Sem;
-
-    Philo( int id, Semaphore sem)
-    {
-        ID  = id;
-        Sem = sem;
-    }
     public void run(){
+       try {
+           System.out.printf("Old message \"%s\" from %s\r\n", message, name);
+           message = exchanger.exchange(message);
 
-      try {
-        while (Count <3 )
-        {
-                Sem.acquire();
-                System.out.println("Philo"+ID+" begin lanch "+Count);
-                Thread.sleep(500);
-                System.out.println("Philo"+ID+" out lanch zone "+Count);
-                Sem.release();
-                Thread.sleep(1000);
-                Count++;
-         }
-       }catch (InterruptedException e){}
+           System.out.printf("New message \"%s\" from %s\r\n", message, name);
+       }catch (InterruptedException e){System.out.println("Interrupt from "+name);}
+       }
 
-    }
+
 }
