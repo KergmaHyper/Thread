@@ -5,79 +5,78 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("START Main ");
 
-       /* Runnable rt1 = ()->{
-            int i=0;
-            System.out.println(">>>>>>>>>>>>>>>>> Start +++"+Thread.currentThread().getName());
-            while( (!Thread.currentThread().isInterrupted()&i<10)) {
-                try { i++;
-                    Thread.sleep(500);
-                    System.out.printf("LOOP is thread %s isInterrupted %b\r\n",
-                            Thread.currentThread().getName(),Thread.currentThread().isInterrupted());
-                } catch (InterruptedException ie) {
-                    System.out.printf("Thread %s interrupted\r\n",Thread.currentThread().getName());
-                    break;  } }
-            System.out.println("<<<<<<<<<<<<<<<<< Stop RT1 ---"+Thread.currentThread().getName()); };
-
-
-         mThread myThr = new mThread("My_TEST_Thread");
-         myThr.start();
-         try { Thread.sleep(46);
-             myThr.interrupt();
-         }catch (InterruptedException ie){System.out.println("Interrupt sleep");}
-*/
-        CommRes MainCR = new CommRes();
-        for(int t=0;t<8;t++) {
-            Thread NewTh = new Thread(new runThr(MainCR));
-            NewTh.setName("MainCR"+t);
-            NewTh.start();
-            //try {NewTh.join();}catch (InterruptedException e){};
-        }
+        Store store = new Store();
+        Producer producer = new Producer(store);
+        Consumer consumer = new Consumer(store);
+        new Thread(producer).start();
+        new Thread(consumer).start();
 
         System.out.println("STOP Main ");
 
     }
 }
 
-class CommRes {
-    int x;
-
-    synchronized void  xout(){
-
-          for (x=0; x<5;x++){
-          System.out.printf("%s %d\n",Thread.currentThread().getName(),this.x);
-          try {Thread.sleep(200);  }catch (InterruptedException e){}
-          }
-    }
-}
-
-class runThr implements Runnable{
-    CommRes CR;
-    runThr(CommRes cr){CR = cr;}
-
-    public void run(){  CR.xout();  }
-}
 
 
 
-
-
-
-
-
-
-
-
-
-
-class mThread extends Thread{
-    mThread(String name){super(name);}
-
-    public void run(){
-        System.out.println("Start thread: "+getName());
-        int count=0;
-        while (!isInterrupted()){
-            System.out.println("Loop from: "+getName()+" count: "+ count++ + " Interrupt: "+isInterrupted());
+class Store {
+    private int product=0;
+    public synchronized void get() {
+        while (product < 1) {
+            try {
+                wait();
+                System.out.println("STORY EMPTY");
+            } catch (InterruptedException e) {
+            }
         }
-        System.out.println("Stop thread: "+getName());
+            product--;
+            System.out.printf("Consummer get 1 pc product from STORY\r\n");
+            System.out.printf("Avalable %d pc product \r\n", product);
+            notify();
+        }
+
+
+
+        public synchronized void put() {
+        while (product >= 3) {
+            try {
+                wait();
+                System.out.println("STORY FULL");
+            }
+            catch (InterruptedException e) {}
+        }
+
+            product++;
+            System.out.printf("Produser put 1 pc product into STORE\r\n");
+            System.out.printf("Avalable %d ps product\r\n",product);
+            notify();
+
     }
 }
+
+  class Producer implements Runnable{
+        Store store;
+        Producer(Store store){
+            this.store=store;
+        }
+         public void run() {
+            for (int i = 1; i < 20; i++) {
+                store.put();
+            }
+         }
+    }
+
+  class Consumer implements Runnable{
+        Store store;
+        Consumer(Store store){
+            this.store=store;
+        }
+        public void run(){
+            for (int i = 1;i<20;i++){
+                store.get();
+            }
+        }
+  }
+
+
+
