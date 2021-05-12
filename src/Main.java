@@ -5,13 +5,14 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("START Main ");
-        Semaphore sem1 = new Semaphore(3,true);
-        CommonResource comres1 = new CommonResource();
+        Semaphore table = new Semaphore(2);
 
-        new Thread( new Count(comres1,sem1,"Thread1",1)).start();
-        new Thread( new Count(comres1,sem1,"Thread2",10)).start();
-        new Thread( new Count(comres1,sem1,"Thread3",100)).start();
-        new Thread( new Count(comres1,sem1,"Thread4",1000)).start();
+        for ( int i = 1; i < 6; i++ ) {
+         new Thread(
+                 new Philo(i,table) );
+        }
+
+
 
 
         System.out.println("STOP Main ");
@@ -19,35 +20,33 @@ public class Main {
     }
 }
 
-class CommonResource{
-    int x=0;
-}
 
-class Count implements Runnable{
-    CommonResource res;
-    Semaphore sem;
-    String name;
-    int count;
-    Count(CommonResource res,Semaphore sem, String name, int count){
-        this.res=res;
-        this.sem=sem;
-        this.name=name;
-        this.count=count;
+class Philo implements Runnable {
+    int ID;
+    int Count = 0;
+    Semaphore Sem;
+
+    Philo( int id, Semaphore sem)
+    {
+        ID  = id;
+        Sem = sem;
     }
     public void run(){
-        try{
-            System.out.println("Request access CommonResurce from "+this.name);
-            sem.acquire();
-            for (int i=1;i<10;i++){
-               res.x+=count;
-               System.out.println(this.name+":"+res.x);
-            }
 
-        }catch (InterruptedException e){}
-        System.out.println("Release access CommonResource from "+this.name);
-        sem.release();
+        while (Count<2){
+            try {
+                Sem.acquire();
+                System.out.println("Philo"+ID+" begin lanch.");
+                Thread.sleep(500);
+                Count++;
+                System.out.println("Philo"+ID+" out lanch zone.");
+                Thread.sleep(500);
+                Sem.release();
+            }catch (InterruptedException e){}
+
+
+        }
+
+
     }
-
-
-
 }
