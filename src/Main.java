@@ -1,37 +1,65 @@
 import java.lang.*;
 import java.util.concurrent.Exchanger;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.Semaphore;
 
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("START Main ");
-        Exchanger<String> ex1 = new Exchanger<String>();
-        new Thread(new Change(ex1,"Thread1","Message1 from Thread1")).start();
-        new Thread(new Change(ex1,"Thread2","Message2 from Thread2")).start();
-        new Thread(new Change(ex1,"Thread3","Message3 from Thread3")).start();
-        new Thread(new Change(ex1,"Thread4","Message4 from Thread4")).start();
-        new Thread(new Change(ex1,"Thread5","Message5 from Thread5")).start();
+        Phaser phaser1 =new Phaser(1);
+        new Thread(new PhaseThr(phaser1,"Thread1",500)).start();
+        new Thread(new PhaseThr(phaser1,"Thread2",1500)).start();
+        new Thread(new PhaseThr(phaser1,"Thread3",2100)).start();
+        new Thread(new PhaseThr(phaser1,"Thread4",800)).start();
+
+        System.out.println("Main: Work in phase: "+phaser1.getPhase());
+        phaser1.arriveAndAwaitAdvance();
+        System.out.println("Main: Work in phase: "+phaser1.getPhase());
+        phaser1.arriveAndAwaitAdvance();
+        System.out.println("Main: Work in phase: "+phaser1.getPhase());
+        phaser1.arriveAndDeregister();
+        System.out.println("Main:  END ALL PHASES "+phaser1.getPhase());
+
+
+
         System.out.println("STOP Main ");
     }
 }
-class Change implements Runnable{
-    Exchanger<String> exchanger;
-    String message;
+class PhaseThr implements Runnable{
+    Phaser phaser;
     String name;
-
-    Change(Exchanger exchanger,String name,String message){
-        this.message=message;
-        this.exchanger=exchanger;
-        this.name = name;    }
+    int sleepTime;
+    PhaseThr(Phaser phaser,String name,int sleepTime){
+        this.phaser=phaser;
+        this.name = name;
+        this.sleepTime=sleepTime;
+        phaser.register();}
 
     public void run(){
-       try {
-           System.out.printf("Old message \"%s\" from %s\r\n", message, name);
-           message = exchanger.exchange(message);
 
-           System.out.printf("New message \"%s\" from %s\r\n", message, name);
+        System.out.println("Thread: "+name+" working in phase: "+phaser.getPhase());
+        phaser.arriveAndAwaitAdvance();
+       try {
+          Thread.sleep(sleepTime);
        }catch (InterruptedException e){System.out.println("Interrupt from "+name);}
+       //phaser.arriveAndAwaitAdvance();
+
+        System.out.println("Thread: "+name+" working in phase: "+phaser.getPhase());
+        phaser.arriveAndAwaitAdvance();
+        try {
+            Thread.sleep(sleepTime);
+        }catch (InterruptedException e){System.out.println("Interrupt from "+name);}
+        //phaser.arriveAndAwaitAdvance();
+
+        System.out.println("Thread: "+name+" working in phase: "+phaser.getPhase());
+        phaser.arriveAndDeregister();
+        try {
+            Thread.sleep(sleepTime);
+        }catch (InterruptedException e){System.out.println("Interrupt from "+name);}
+        //phaser.arriveAndDeregister();
+
+
        }
 
 
