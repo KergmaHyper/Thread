@@ -8,7 +8,9 @@ public class Main {
         Semaphore table = new Semaphore(2);
 
         for ( int i = 1; i < 6; i++ ) {
+
          new Thread( new Philo(i,table) ).start();
+
         }
 
 
@@ -22,7 +24,9 @@ public class Main {
 
 class Philo implements Runnable {
     int ID;
+
     int Count = 1;
+
     Semaphore Sem;
 
     Philo( int id, Semaphore sem)
@@ -31,6 +35,7 @@ class Philo implements Runnable {
         Sem = sem;
     }
     public void run(){
+
       try {
         while (Count <3 )
         {
@@ -43,5 +48,6 @@ class Philo implements Runnable {
                 Count++;
          }
        }catch (InterruptedException e){}
+
     }
 }
